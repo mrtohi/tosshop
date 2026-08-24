@@ -49,7 +49,7 @@ export default function CartDrawer({ open, onClose, autoCheckout }) {
     if (!validate()) return;
     setStep("submitting");
     try {
-      const { orderId } = await createOrder({
+      const { orderId, orderToken } = await createOrder({
         customerName: form.customerName,
         phone: form.phone,
         address: form.address,
@@ -57,7 +57,7 @@ export default function CartDrawer({ open, onClose, autoCheckout }) {
         postalCode: form.postalCode,
         items: items.map((i) => ({ productId: i.id, qty: i.qty })),
       });
-      const { paymentUrl } = await requestPayment(orderId);
+      const { paymentUrl } = await requestPayment(orderId, orderToken);
       window.location.href = paymentUrl;
     } catch (err) {
       setStep("error");

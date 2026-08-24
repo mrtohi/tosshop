@@ -50,8 +50,10 @@ export async function submitReview(productId, { authorName, rating, comment }) {
   return res.json();
 }
 
-export async function getOrder(id) {
-  const res = await fetch(`${API_BASE}/api/orders/${id}`);
+export async function getOrder(id, token) {
+  const res = await fetch(`${API_BASE}/api/orders/${id}`, {
+    headers: token ? { "X-Order-Token": token } : {},
+  });
   if (!res.ok) return null;
   return res.json();
 }
@@ -66,11 +68,11 @@ export async function createOrder(payload) {
   return res.json();
 }
 
-export async function requestPayment(orderId) {
+export async function requestPayment(orderId, orderToken) {
   const res = await fetch(`${API_BASE}/api/payment/request`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orderId }),
+    body: JSON.stringify({ orderId, orderToken }),
   });
   if (!res.ok) throw new Error("اتصال به درگاه پرداخت ناموفق بود");
   return res.json();

@@ -3,7 +3,9 @@ import Header from "../../components/Header";
 import { getOrder } from "../../lib/api";
 
 export async function getServerSideProps({ query }) {
-  const order = query.orderId ? await getOrder(query.orderId) : null;
+  const order = query.orderId && query.orderToken
+    ? await getOrder(query.orderId, query.orderToken)
+    : null;
   return { props: { order } };
 }
 

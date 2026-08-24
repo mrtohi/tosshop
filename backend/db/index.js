@@ -1,5 +1,6 @@
 const Database = require("better-sqlite3");
 const path = require("path");
+const crypto = require("crypto");
 
 const db = new Database(path.join(__dirname, "store.sqlite"));
 db.pragma("journal_mode = WAL");
@@ -91,6 +92,12 @@ ensureColumn("products", "specs", "TEXT DEFAULT ''");
 ensureColumn("products", "slug", "TEXT DEFAULT ''");
 ensureColumn("orders", "city", "TEXT DEFAULT ''");
 ensureColumn("orders", "postal_code", "TEXT DEFAULT ''");
+ensureColumn("orders", "public_token", "TEXT DEFAULT ''");
+const ordersMissingToken = db.prepare("SELECT id FROM orders WHERE public_token = '' OR public_token IS NULL").all();
+if (ordersMissingToken.length > 0) {
+  const updateOrderToken = db.prepare("UPDATE orders SET public_token = ? WHERE id = ?");
+  ordersMissingToken.forEach((order) => updateOrderToken.run(crypto.randomBytes(32).toString("hex"), order.id));
+}
 
 // برای محصولات قدیمی‌تر که هنوز اسلاگ ندارند، از روی نامشان یک اسلاگ می‌سازیم
 const { slugify } = require("../utils/slugify");

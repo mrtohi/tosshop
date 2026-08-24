@@ -26,7 +26,19 @@ const app = express();
 // crossOriginResourcePolicy خاموش می‌شود چون عکس‌های /uploads باید از دامنهٔ فرانت‌اند قابل‌نمایش باشند
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 
-app.use(cors({ origin: process.env.FRONTEND_URL || "*" }));
+const allowedOrigins = (process.env.FRONTEND_URL || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(cors({
+  origin(origin, callback) {
+    // Requests without an Origin header include server-to-server calls and the
+    // payment gateway callback. Browser requests must be explicitly allowed.
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error("Origin not allowed by CORS"));
+  },
+}));
 app.use(express.json());
 app.use(generalLimiter);
 
